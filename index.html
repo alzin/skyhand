@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SkyHand: fly a drone with your hand</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.js"></script>
+  </head>
+
+  <body>
+    <main></main>
+    <canvas id="hud"></canvas>
+
+    <!-- ================= START SCREEN ================= -->
+    <section id="start" aria-labelledby="start-title">
+      <div class="start-inner">
+        <div class="card intro">
+          <h1 id="start-title">SkyHand</h1>
+          <p class="lede">Fly a camera drone over hills, a lake and a small town, steered by your bare hand.</p>
+
+          <h2>Pre-flight check</h2>
+          <ol class="checklist">
+            <li id="check-camera" data-state="wait">
+              <span class="mark" aria-hidden="true"></span>
+              <span class="item"><b>Camera</b><span class="note">Allow camera access when your browser asks.</span></span>
+            </li>
+            <li id="check-model" data-state="wait">
+              <span class="mark" aria-hidden="true"></span>
+              <span class="item"><b>Hand tracking model</b><span class="note">Downloads once and takes a few seconds.</span></span>
+            </li>
+            <li id="check-hand" data-state="wait">
+              <span class="mark" aria-hidden="true"></span>
+              <span class="item"><b>Your hand</b><span class="note">Hold up an open hand, palm toward the camera.</span></span>
+            </li>
+          </ol>
+
+          <button id="start-button" type="button">Start flying</button>
+          <p class="fine">No camera? Fly with W A S D and the arrow keys.</p>
+        </div>
+
+        <div class="card gestures">
+          <h2>Your hand is the controller</h2>
+          <dl>
+            <div><dt>Pinch and hold</dt><dd>Take off or land</dd></div>
+            <div><dt>Raise or lower</dt><dd>Climb or descend</dd></div>
+            <div><dt>Tilt fingers toward the screen</dt><dd>Fly forward; tilt back to reverse</dd></div>
+            <div><dt>Tilt like a steering wheel</dt><dd>Turn</dd></div>
+            <div><dt>Move left or right</dt><dd>Slide sideways</dd></div>
+            <div><dt>Make a fist</dt><dd>Brake and hover</dd></div>
+          </dl>
+          <p class="fine">The pose you pinch with becomes "sticks centred", so start relaxed.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HELP ================= -->
+    <section id="help" class="hidden" role="dialog" aria-labelledby="help-title">
+      <div class="card wide">
+        <button id="help-close" type="button" aria-label="Close help">&times;</button>
+        <h2 id="help-title">Controls</h2>
+
+        <div class="cols">
+          <div>
+            <h3>One hand</h3>
+            <dl>
+              <div><dt>Pinch and hold</dt><dd>Take off or land</dd></div>
+              <div><dt>Raise or lower</dt><dd>Climb or descend</dd></div>
+              <div><dt>Tilt fingers forward</dt><dd>Fly forward; tilt back to reverse</dd></div>
+              <div><dt>Steering-wheel tilt</dt><dd>Turn</dd></div>
+              <div><dt>Move left or right</dt><dd>Slide sideways</dd></div>
+              <div><dt>Make a fist</dt><dd>Brake and hover</dd></div>
+            </dl>
+
+            <h3>Two hands, radio style</h3>
+            <dl>
+              <div><dt>Left hand up or down</dt><dd>Climb or descend</dd></div>
+              <div><dt>Left hand sideways</dt><dd>Turn</dd></div>
+              <div><dt>Right hand up or down</dt><dd>Forward or back</dd></div>
+              <div><dt>Right hand sideways</dt><dd>Slide</dd></div>
+            </dl>
+          </div>
+
+          <div>
+            <h3>Keyboard</h3>
+            <dl class="keys">
+              <div><dt><kbd>W</kbd><kbd>S</kbd></dt><dd>Forward, back</dd></div>
+              <div><dt><kbd>A</kbd><kbd>D</kbd></dt><dd>Slide left, right</dd></div>
+              <div><dt><kbd>&uarr;</kbd><kbd>&darr;</kbd></dt><dd>Climb, descend</dd></div>
+              <div><dt><kbd>&larr;</kbd><kbd>&rarr;</kbd></dt><dd>Turn</dd></div>
+              <div><dt><kbd>Space</kbd></dt><dd>Take off or land</dd></div>
+              <div><dt><kbd>H</kbd></dt><dd>Return home</dd></div>
+              <div><dt><kbd>C</kbd></dt><dd>Camera: chase, FPV, gimbal, pilot</dd></div>
+              <div><dt><kbd>F</kbd></dt><dd>Flight mode: cine, normal, sport, attitude</dd></div>
+              <div><dt><kbd>T</kbd></dt><dd>One or two hands</dd></div>
+              <div><dt><kbd>G</kbd></dt><dd>Wind strength</dd></div>
+              <div><dt><kbd>P</kbd></dt><dd>Take a photo</dd></div>
+              <div><dt><kbd>M</kbd></dt><dd>Sound on or off</dd></div>
+              <div><dt><kbd>R</kbd></dt><dd>Reset the drone</dd></div>
+              <div><dt>Mouse wheel</dt><dd>Chase camera distance</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <p class="fine">Like a real drone it tilts to move and leans into the wind to stay still. Attitude mode turns off the position hold, so you feel how pilots fly without GPS help.</p>
+      </div>
+    </section>
+
+    <script src="utils.js"></script>
+    <script src="world.js"></script>
+    <script src="drone.js"></script>
+    <script src="hands.js"></script>
+    <script src="audio.js"></script>
+    <script src="hud.js"></script>
+    <script src="sketch.js"></script>
+  </body>
+</html>

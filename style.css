@@ -1,0 +1,346 @@
+/* SkyHand: page chrome. The in-flight display is drawn by hud.js. */
+
+:root {
+  --ink: #0e1a24;
+  --ink-glass: rgba(14, 26, 36, 0.8);
+  --cloud: #f2f6f9;
+  --dim: rgba(242, 246, 249, 0.7);
+  --faint: rgba(242, 246, 249, 0.42);
+  --line: rgba(255, 255, 255, 0.14);
+  --signal: #ff7a1a;
+  --lichen: #8fd694;
+  --amber: #ffc845;
+  --alert: #ff5a4f;
+  --text: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #c7d9e9;
+  color: var(--cloud);
+  font-family: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+main canvas {
+  display: block;
+}
+
+#hud {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  touch-action: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+/* ---------- start screen ---------- */
+
+#start {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  padding: clamp(16px, 4vh, 48px) clamp(16px, 4vw, 56px);
+  background: linear-gradient(90deg,
+    rgba(14, 26, 36, 0.9) 0%,
+    rgba(14, 26, 36, 0.62) 42%,
+    rgba(14, 26, 36, 0.05) 80%);
+}
+
+.start-inner {
+  min-height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  gap: 20px;
+}
+
+.card {
+  width: min(410px, 100%);
+  padding: 26px 28px;
+  border-radius: 18px;
+  background: var(--ink-glass);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+
+.card.gestures {
+  width: min(350px, 100%);
+  padding: 22px 24px;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(56px, 8vw, 88px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  margin: 12px 0 22px;
+  max-width: 34ch;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--dim);
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h3 {
+  margin: 20px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+
+/* ---------- pre-flight checklist ---------- */
+
+.checklist {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  counter-reset: step;
+}
+
+.checklist li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.checklist li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--faint);
+  font: 700 13px/1 var(--display);
+  color: var(--dim);
+}
+
+.mark::before {
+  content: counter(step);
+}
+
+li[data-state="wait"] .mark {
+  border-color: var(--amber);
+  color: var(--amber);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+li[data-state="done"] .mark {
+  border-color: var(--lichen);
+  background: var(--lichen);
+  color: var(--ink);
+}
+
+li[data-state="done"] .mark::before {
+  content: "\2713";
+}
+
+li[data-state="fail"] .mark {
+  border-color: var(--alert);
+  color: var(--alert);
+}
+
+li[data-state="fail"] .mark::before {
+  content: "!";
+}
+
+.item b {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.note {
+  display: block;
+  margin-top: 2px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 0 5px rgba(255, 200, 69, 0.18);
+  }
+}
+
+
+/* ---------- buttons ---------- */
+
+#start-button {
+  display: block;
+  width: 100%;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--signal);
+  color: var(--ink);
+  font: 700 19px/1 var(--text);
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+#start-button:hover {
+  filter: brightness(1.07);
+}
+
+#start-button:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 3px solid var(--cloud);
+  outline-offset: 3px;
+}
+
+.fine {
+  margin: 12px 0 0;
+  max-width: 60ch;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--faint);
+}
+
+
+/* ---------- gesture and key lists ---------- */
+
+dl {
+  margin: 0;
+}
+
+dl > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+dt {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--dim);
+}
+
+.keys > div {
+  grid-template-columns: 110px 1fr;
+}
+
+.keys dt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+kbd {
+  min-width: 26px;
+  padding: 3px 7px;
+  border: 1px solid var(--faint);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  font: 600 13px/1.2 var(--display);
+  text-align: center;
+  color: var(--cloud);
+}
+
+
+/* ---------- help dialog ---------- */
+
+#help {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(14, 26, 36, 0.55);
+}
+
+.card.wide {
+  position: relative;
+  width: min(860px, 100%);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+#help-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--cloud);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+
+/* ---------- small screens + reduced motion ---------- */
+
+@media (max-width: 760px) {
+  #start {
+    background: rgba(14, 26, 36, 0.78);
+  }
+
+  .cols {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
